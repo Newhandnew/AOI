@@ -33,6 +33,7 @@ predictions = tf.argmax(logits, 1)
 # })
 names_to_values, names_to_updates = slim.metrics.aggregate_metric_map({
     'test/Accuracy': slim.metrics.streaming_accuracy(predictions, test_label_batch),
+    'test/mse': slim.metrics.streaming_mean_squared_error(predictions, test_label_batch),
     # 'test/Recall@5': slim.metrics.streaming_recall_at_k(logits, test_label, 5),
 })
 for name, tensor in names_to_updates.items():
@@ -46,16 +47,18 @@ for metric_name, metric_value in names_to_values.items():
 
 # Setup the global step.
 slim.get_or_create_global_step()
-with tf.Session() as sess:
-    tf.logging.set_verbosity(tf.logging.INFO)
-    output_dir = logs_path # Where the summaries are stored.
-    eval_interval_secs = 1 # How often to run the evaluation.
-    slim.evaluation.evaluation_loop(
-        '',
-        logs_path,
-        logs_path,
-        num_evals=num_batches,
-        eval_op=predictions,
-        summary_op=tf.summary.merge(summary_ops),
-        eval_interval_secs=eval_interval_secs)
+session_config = tf.ConfigProto()
+session_config.gpu_options.allow_growth = True
+session = tf.Session(config=session_config)
+tf.logging.set_verbosity(tf.logging.INFO)
+output_dir = logs_path # Where the summaries are stored.
+eval_interval_secs = 10 # How often to run the evaluation.
+slim.evaluation.evaluation_loop(
+    '',
+    logs_path,
+    logs_path,
+    num_evals=num_batches,
+    eval_op=list(names_to_updates.values()),
+    summary_op=tf.summary.merge(summary_ops),
+    eval_interval_secs=eval_interval_secs)
 

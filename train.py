@@ -83,15 +83,17 @@ with tf.Graph().as_default():
     for name, tensor in names_to_updates.items():
         tf.summary.scalar(name, tensor)
     saver = tf.train.Saver()
-    with tf.Session() as sess:
-        prev_model = tf.train.get_checkpoint_state(logs_path)
-        if load_checkpoint:
-            if prev_model:
-                saver.restore(sess, prev_model.model_checkpoint_path)
-                print('Checkpoint found, {}'.format(prev_model))
-            else:
-                print('No checkpoint found')
-    # Run the training:
+    session_config = tf.ConfigProto()
+    session_config.gpu_options.allow_growth = True
+    session = tf.Session(config=session_config)
+    prev_model = tf.train.get_checkpoint_state(logs_path)
+    if load_checkpoint:
+        if prev_model:
+            saver.restore(session, prev_model.model_checkpoint_path)
+            print('Checkpoint found, {}'.format(prev_model))
+        else:
+            print('No checkpoint found')
+# Run the training:
     final_loss = slim.learning.train(
         train_op,
         logdir=logs_path,
