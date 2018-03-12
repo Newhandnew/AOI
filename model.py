@@ -3,7 +3,7 @@ import tensorflow as tf
 slim = tf.contrib.slim
 
 
-def model(inputs, is_training, dropout_rate, num_classes, scope='Net'):
+def model(inputs, num_classes, is_training, dropout_rate=0.5, scope='Net'):
     with tf.variable_scope(scope):
         with slim.arg_scope([slim.conv2d, slim.fully_connected],
                             normalizer_fn=slim.batch_norm):

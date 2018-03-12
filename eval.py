@@ -1,66 +1,61 @@
 import tensorflow as tf
 import os
+import math
 import numpy as np
-import matplotlib.pyplot as plt
-
 from model import model
-from tfrecord_io import read_and_decode
+from alexnet import alexnet_v2
+from read_tfrecord import get_data_batch, get_record_number
+slim = tf.contrib.slim
 
-# Parameters
-checkpoint_dir = "checkpoint"
-checkpoint_name = 'model.ckpt'
-output_dir = 'output'
+data_dir = 'data'
 tfrecord_test = 'AOI_test.tfrecords'
-test_tf_path = os.path.join(output_dir, tfrecord_test)
+test_tf_path = os.path.join(data_dir, tfrecord_test)
+logs_path = "logs_alex"
 crop_size = [224, 224]
-test_samples = 2
-# Network Parameters
 num_classes = 2
-channel = 1
-test_round = 40
 
-# tf Graph input
-x = tf.placeholder(tf.float32, [None, crop_size[0], crop_size[1], channel])
-y = tf.placeholder(tf.float32, [None, num_classes])
-is_training = tf.placeholder(tf.bool, name='IsTraining')
+num_examples = get_record_number(test_tf_path)
+batch_size = 32
+num_batches = math.ceil(num_examples / float(batch_size))
+# Load the data
+test_image_batch, test_label_batch = get_data_batch(
+    test_tf_path, crop_size, batch_size, is_training=False, one_hot=False)
+# convert to float batch
+test_image_batch = tf.to_float(test_image_batch)
+# Define the network
+logits, _ = alexnet_v2(test_image_batch, num_classes=num_classes, is_training=False)
 
-test_image, test_label = read_and_decode(test_tf_path, crop_size)
-train_image_batch, train_label_batch = tf.train.batch(
-    [test_image, test_label], batch_size=50, allow_smaller_final_batch=True)
-one_hot_label = tf.one_hot(indices=train_label_batch, depth=num_classes)
+predictions = tf.argmax(logits, 1)
 
-logits, _ = model(x, is_training, 1, num_classes)
-predict = tf.argmax(logits, 1)
-label = tf.argmax(y, 1)
-correct_pred = tf.equal(predict, label)
-accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
+# Choose the metrics to compute:
+# names_to_values, names_to_updates = slim.metrics.aggregate_metric_map({
+#     'accuracy': slim.metrics.accuracy(predictions, test_label_batch),
+# })
+names_to_values, names_to_updates = slim.metrics.aggregate_metric_map({
+    'test/Accuracy': slim.metrics.streaming_accuracy(predictions, test_label_batch),
+    # 'test/Recall@5': slim.metrics.streaming_recall_at_k(logits, test_label, 5),
+})
+for name, tensor in names_to_updates.items():
+    tf.summary.scalar(name, tensor)
+# Create the summary ops such that they also print out to std output:
+summary_ops = []
+for metric_name, metric_value in names_to_values.items():
+  op = tf.summary.scalar(metric_name, metric_value)
+  op = tf.Print(op, [metric_value], metric_name)
+  summary_ops.append(op)
 
-saver = tf.train.Saver()
-
-# Launch the graph
+# Setup the global step.
+slim.get_or_create_global_step()
 with tf.Session() as sess:
-    prev_model = tf.train.get_checkpoint_state(checkpoint_dir)
-    if prev_model:
-        saver.restore(sess, prev_model.model_checkpoint_path)
-        print('Checkpoint found, {}'.format(prev_model))
-        coord = tf.train.Coordinator()
-        threads = tf.train.start_queue_runners(coord=coord)
-        accuracy_array = []
-        for i in range(test_round):
-            images, labels = sess.run([train_image_batch, one_hot_label])
-            predict_array, label_array, acc = sess.run([predict, label, accuracy], feed_dict={
-                x: images, y: labels, is_training: False})
-            print("Testing Accuracy: {:.4f}".format(acc))
-            accuracy_array.append(acc)
-            incorrect = (predict_array != label_array)
-            incorrect_indices = np.nonzero(incorrect)[0]
-            for i, incorrect in enumerate(incorrect_indices[:15]):
-                plt.subplot(5, 3, i + 1)
-                plt.imshow(images[incorrect].reshape(crop_size), cmap='gray', interpolation='none')
-                plt.title("Predicted {}, Class {}".format(predict_array[incorrect], label_array[incorrect]))
-                plt.xticks([])
-                plt.yticks([])
-            plt.savefig('error result {}'.format(i))
-        print('accuracy: {}'.format(np.mean(accuracy_array)))
-    else:
-        print('No checkpoint found')
+    tf.logging.set_verbosity(tf.logging.INFO)
+    output_dir = logs_path # Where the summaries are stored.
+    eval_interval_secs = 1 # How often to run the evaluation.
+    slim.evaluation.evaluation_loop(
+        '',
+        logs_path,
+        logs_path,
+        num_evals=num_batches,
+        eval_op=predictions,
+        summary_op=tf.summary.merge(summary_ops),
+        eval_interval_secs=eval_interval_secs)
+
