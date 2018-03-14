@@ -1,6 +1,4 @@
 import os
-
-import numpy as np
 import tensorflow as tf
 import math
 from alexnet import alexnet_v2
@@ -20,8 +18,7 @@ train_tf_path = os.path.join(data_dir, tfrecord_train)
 crop_size = [224, 224]
 # Learning params
 learning_rate = 0.01
-num_epochs = 300
-save_step = 500
+num_epochs = 500
 batch_size = 64
 num_examples = get_record_number(train_tf_path)
 num_batches = math.ceil(num_examples / float(batch_size))
@@ -31,9 +28,6 @@ print('batch number: {}'.format(num_batches))
 dropout_rate = 0.5
 num_classes = 2
 channel = 1
-
-# How often we want to write the tf.summary data to disk
-display_step = 20
 
 checkpoint_dir = "checkpoint_alex"
 checkpoint_name = 'model.ckpt'
@@ -85,6 +79,7 @@ with tf.Graph().as_default():
     saver = tf.train.Saver()
     session_config = tf.ConfigProto()
     session_config.gpu_options.allow_growth = True
+    session_config.log_device_placement = True
     session = tf.Session(config=session_config)
     prev_model = tf.train.get_checkpoint_state(logs_path)
     if load_checkpoint:
@@ -98,8 +93,9 @@ with tf.Graph().as_default():
         train_op,
         logdir=logs_path,
         number_of_steps=num_epochs * num_batches,
-        session_config=tf.ConfigProto(log_device_placement=True),
-        save_summaries_secs=10
+        session_config=session_config,
+        save_summaries_secs=20,
+        save_interval_secs=300
     )
 
     print('Finished training. Final batch loss %d' % final_loss)

@@ -3,4 +3,5 @@ __pycache__/
 checkpoint/
 data/
 logs/
-
+logs_alex/
+wrong_images/
