@@ -25,9 +25,9 @@ def main(_):
 
     crop_size = [224, 224]
     # Learning params
-    learning_rate = 0.01
+    learning_rate = 0.001
     num_epochs = 500
-    batch_size = 64
+    batch_size = 128
     num_examples = get_record_number(train_tf_path)
     num_batches = math.ceil(num_examples / float(batch_size))
     print('batch number: {}'.format(num_batches))
@@ -50,13 +50,12 @@ def main(_):
         tf.summary.image('image', train_image_batch)
 
         with slim.arg_scope(alexnet_my_arg_scope(is_training=True)):
-            net, _ = alexnet_v2(train_image_batch, num_classes=num_classes, is_training=True)
+            net, end_points = alexnet_v2(train_image_batch, num_classes=num_classes, is_training=True)
         # make summaries of every operation in the node
-        # for layer_name, layer_op in end_points.items():
-        #     tf.summary.histogram(layer_name, layer_op)
+        for layer_name, layer_op in end_points.items():
+            tf.summary.histogram(layer_name, layer_op)
 
         # Specify the loss function (outside the model!)
-        # one_hot_labels = slim.one_hot_encoding(train_label_batch, num_classes)
         one_hot_label = tf.one_hot(indices=train_label_batch, depth=num_classes)
         slim.losses.softmax_cross_entropy(net, one_hot_label)
         total_loss = slim.losses.get_total_loss()
@@ -65,7 +64,8 @@ def main(_):
         tf.summary.scalar('losses/Total Loss', total_loss)
 
         # Specify the optimizer and create the train op:
-        optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
+        # optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
+        optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         train_op = slim.learning.create_train_op(total_loss, optimizer)
 
         # Track accuracy and recall

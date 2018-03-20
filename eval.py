@@ -25,7 +25,7 @@ def main(_):
     num_classes = 2
 
     num_examples = get_record_number(test_tf_path)
-    batch_size = 32
+    batch_size = 64
     num_batches = math.ceil(num_examples / float(batch_size))
     # Load the data
     test_image_batch, test_label_batch = get_data_batch(
