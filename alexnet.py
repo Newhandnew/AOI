@@ -59,7 +59,7 @@ def myswish_beta(x):
 
 def alexnet_my_arg_scope(is_training):
     with slim.arg_scope([slim.conv2d, slim.fully_connected],
-                        activation_fn=myswish_beta,
+                        activation_fn=tf.nn.relu,
                         normalizer_fn=slim.batch_norm,
                         normalizer_params={'is_training': is_training, 'decay': 0.95}):
         with slim.arg_scope([slim.conv2d], padding='SAME'):

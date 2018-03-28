@@ -25,9 +25,9 @@ def main(_):
 
     crop_size = [224, 224]
     # Learning params
-    learning_rate = 0.001
+    learning_rate = 0.01
     num_epochs = 500
-    batch_size = 128
+    batch_size = 256
     num_examples = get_record_number(train_tf_path)
     num_batches = math.ceil(num_examples / float(batch_size))
     print('batch number: {}'.format(num_batches))
@@ -64,8 +64,8 @@ def main(_):
         tf.summary.scalar('losses/Total Loss', total_loss)
 
         # Specify the optimizer and create the train op:
-        # optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
-        optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
+        optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
+        # optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate)
         train_op = slim.learning.create_train_op(total_loss, optimizer)
 
         # Track accuracy and recall
