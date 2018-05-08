@@ -110,7 +110,7 @@ class CropImage(object):
     def save_defect_image(self, prediction, image_name, crop_size):
         defects = self.get_defect_axis(prediction)
         for defect in defects:
-            cv2.rectangle(self.image, defect, (defect[0] + crop_size[0], defect[1] + crop_size[1]), 255)
+            cv2.rectangle(self.image, defect, (defect[0] + crop_size[0], defect[1] + crop_size[1]), 255, 6)
         image_path = os.path.join(self.save_image_dir, image_name)
         cv2.imwrite(image_path, self.image)
 

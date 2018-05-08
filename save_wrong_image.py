@@ -2,7 +2,7 @@ import tensorflow as tf
 import os
 import math
 import numpy as np
-from PIL import Image
+import cv2
 import time
 from alexnet import alexnet_v2, alexnet_my_arg_scope
 from read_tfrecord import get_data_batch, get_record_number
@@ -67,6 +67,6 @@ with tf.Session(config=session_config) as sess:
             file_name = test_list_array[i * batch_size + index].rstrip()
             output_path = os.path.join(output_image_dir, file_name[10:])
             print(file_name, end=' ')
-            im = Image.fromarray(images[index].reshape(crop_size))
-            im.convert('RGB').save(output_path)
+            cv2.imwrite(output_path, images[index])
+
 
