@@ -1,10 +1,11 @@
 import tensorflow as tf
 import cv2
 import numpy as np
+import time
 
 
 flags = tf.app.flags
-flags.DEFINE_string("frozen_model_name", "logs/alex_batch_norm_pattern2_batch512/frozen_model.pb", "frozen name")
+flags.DEFINE_string("frozen_model_name", "logs/mobilenet/frozen_model.pb", "frozen name")
 FLAGS = flags.FLAGS
 
 
@@ -41,6 +42,7 @@ def main(_):
     # cv2.imshow("image", image)
     # cv2.waitKey()
     # # We launch a Session
+    start_time = time.time()
     with tf.Session(graph=graph) as sess:
         # Note: we don't nee to initialize/restore anything
         # There is no Variables in this graph, only hardcoded constants
@@ -50,6 +52,9 @@ def main(_):
         # I taught a neural net to recognise when a sum of numbers is bigger than 45
         # it should return False in this case
         print(y_out)  # [[ False ]] Yay, it works!
+
+    elapsed_time = time.time() - start_time
+    print('inference elapsed time: {}'.format(elapsed_time))
 
 
 if __name__ == '__main__':

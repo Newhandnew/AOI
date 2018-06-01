@@ -1,7 +1,9 @@
 import tensorflow as tf
 import os
 import math
-from alexnet import alexnet_v2, alexnet_my_arg_scope
+# from alexnet import alexnet_v2, alexnet_my_arg_scope
+import mobilenet_v2
+import inception_v1
 from read_tfrecord import get_data_batch, get_record_number
 
 slim = tf.contrib.slim
@@ -31,10 +33,12 @@ def main(_):
     test_image_batch, test_label_batch = get_data_batch(
         test_tf_path, crop_size, batch_size, is_training=False, one_hot=False)
     # convert to float batch
-    test_image_batch = tf.to_float(test_image_batch)
+    float_image_batch = tf.to_float(test_image_batch)
     # Define the network
-    with slim.arg_scope(alexnet_my_arg_scope(is_training=False)):
-        logits, _ = alexnet_v2(test_image_batch, num_classes=num_classes, is_training=False)
+    # with slim.arg_scope(mobilenet_v2.training_scope(is_training=True)):
+    #     logits, _ = mobilenet_v2.mobilenet(test_image_batch, num_classes=num_classes)
+    with slim.arg_scope(inception_v1.inception_v1_arg_scope()):
+        logits, end_points = inception_v1.inception_v1(float_image_batch, num_classes=num_classes, is_training=False)
 
     predictions = tf.argmax(logits, 1)
 

@@ -4,6 +4,7 @@ import numpy as np
 import time
 from alexnet import alexnet_v2, alexnet_my_arg_scope
 from crop_image import CropImage
+# import mobilenet_v2
 
 slim = tf.contrib.slim
 
@@ -19,7 +20,7 @@ def main(_):
     """
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
-    img_path = '6P8B10G0CLZZ/6P8B10G0CLZZ5.tif'
+    img_path = '/home/new/Downloads/dataset/AOI_OK_subsets/4A833K57KQZZ_01.bmp' #'/home/new/Downloads/dataset/AOI/1.25/6P7BCYD22FZZ/6P7BCYD22FZZ1.tif'
     crop_size = [224, 224]
     num_classes = 2
     crop_image = CropImage('ng', num_classes)
@@ -32,6 +33,8 @@ def main(_):
 
     image_tensor = tf.placeholder(tf.uint8, [None, crop_size[0], crop_size[1], 1], name='InputImage')
     # Define the network
+    # with slim.arg_scope(mobilenet_v2.training_scope(is_training=False)):
+    #     logits, _ = mobilenet_v2.mobilenet(tf.to_float(image_tensor), num_classes=num_classes)
     with slim.arg_scope(alexnet_my_arg_scope(is_training=False)):
         logits, _ = alexnet_v2(tf.to_float(image_tensor), num_classes=num_classes, is_training=False)
 

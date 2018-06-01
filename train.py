@@ -1,13 +1,15 @@
 import os
 import tensorflow as tf
 import math
-from alexnet import alexnet_v2, alexnet_v2_arg_scope, alexnet_my_arg_scope
+# from alexnet import alexnet_v2, alexnet_v2_arg_scope, alexnet_my_arg_scope
+import mobilenet_v2
 from read_tfrecord import get_data_batch, get_record_number
+import inception_v1
 
 slim = tf.contrib.slim
 
 flags = tf.app.flags
-flags.DEFINE_string('logs_dir', '',
+flags.DEFINE_string('logs_dir', 'test',
                     'Directory to save the checkpoints and training summaries.')
 FLAGS = flags.FLAGS
 
@@ -45,19 +47,22 @@ def main(_):
         train_image_batch, train_label_batch = get_data_batch(
             train_tf_path, crop_size, batch_size, is_training=True, one_hot=False)
         # convert to float batch
-        train_image_batch = tf.to_float(train_image_batch)
+        float_image_batch = tf.to_float(train_image_batch)
 
-        tf.summary.image('image', train_image_batch)
+        tf.summary.image('image', float_image_batch)
 
-        with slim.arg_scope(alexnet_my_arg_scope(is_training=True)):
-            net, end_points = alexnet_v2(train_image_batch, num_classes=num_classes, is_training=True)
+        # with slim.arg_scope(mobilenet_v2.training_scope(is_training=True)):
+        #     net, end_points = mobilenet_v2.mobilenet(train_image_batch, num_classes=num_classes)
+        with slim.arg_scope(inception_v1.inception_v1_arg_scope()):
+            logits, end_points = inception_v1.inception_v1(float_image_batch, num_classes=num_classes, is_training=True)
+
         # make summaries of every operation in the node
         for layer_name, layer_op in end_points.items():
             tf.summary.histogram(layer_name, layer_op)
 
         # Specify the loss function (outside the model!)
         one_hot_label = tf.one_hot(indices=train_label_batch, depth=num_classes)
-        slim.losses.softmax_cross_entropy(net, one_hot_label)
+        slim.losses.softmax_cross_entropy(logits, one_hot_label)
         total_loss = slim.losses.get_total_loss()
 
         # Create some summaries to visualize the training process:
@@ -69,13 +74,13 @@ def main(_):
         train_op = slim.learning.create_train_op(total_loss, optimizer)
 
         # Track accuracy and recall
-        predictions = tf.argmax(net, 1)
+        predictions = tf.argmax(logits, 1)
 
         # Define the metrics:
         # Recall@5 would make no sense, because we have only 5 classes here
         names_to_values, names_to_updates = slim.metrics.aggregate_metric_map({
             'eval/Accuracy': slim.metrics.streaming_accuracy(predictions, train_label_batch),
-            'eval/Recall@2': slim.metrics.streaming_recall_at_k(net, train_label_batch, 2),
+            'eval/Recall@2': slim.metrics.streaming_recall_at_k(logits, train_label_batch, 2),
         })
         for name, tensor in names_to_updates.items():
             tf.summary.scalar(name, tensor)
