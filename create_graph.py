@@ -41,7 +41,7 @@ def main(_):
             saver.restore(sess, prev_model.model_checkpoint_path)
             tf.train.write_graph(sess.graph_def, logs_path, "nn_model.pbtxt", as_text=True)
             checkpoint_path = os.path.join(logs_path, "nn+model.ckpt")
-            saver.save(sess, checkpoint_path, strip_default_attrs=True)
+            saver.save(sess, checkpoint_path)
 
             elapsed_time = time.time() - start_time
             print('Checkpoint found, {}'.format(prev_model))

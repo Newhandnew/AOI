@@ -7,16 +7,19 @@ def _parse_function(serialized_example, image_size, one_hot=True, num_classes=2)
     features = tf.parse_single_example(serialized_example,
                                        features={
                                            'label': tf.FixedLenFeature([], tf.int64),
-                                           'img_raw': tf.FixedLenFeature([], tf.string),
+                                           'img_side_light': tf.FixedLenFeature([], tf.string),
+                                           'img_pattern': tf.FixedLenFeature([], tf.string)
                                        })
 
-    img = tf.decode_raw(features['img_raw'], tf.uint8)
-    img = tf.reshape(img, image_size)
-    img = tf.expand_dims(img, -1)
+    img_side_light = tf.decode_raw(features['img_side_light'], tf.uint8)
+    img_side_light = tf.reshape(img_side_light, image_size)
+    img_pattern = tf.decode_raw(features['img_pattern'], tf.uint8)
+    img_pattern = tf.reshape(img_pattern, image_size)
+    image = tf.stack((img_side_light, img_pattern), -1)
     label = features['label']
     if one_hot:
         label = tf.one_hot(indices=label, depth=num_classes)
-    return img, label
+    return image, label
 
 
 def get_record_number(tfrecord_path):
@@ -46,7 +49,7 @@ def get_data_batch(tfrecord_path, image_size, batch_size, is_training=False, one
 if __name__ == "__main__":
 
     data_dir = 'data'
-    tfrecord_test = 'AOI_test.tfrecords'
+    tfrecord_test = 'aoi_test.tfrecords'
     test_tf_path = os.path.join(data_dir, tfrecord_test)
     logs_path = "logs"
     image_size = [224, 224]
@@ -63,6 +66,6 @@ if __name__ == "__main__":
         test_tf_path, image_size, batch_size, is_training, one_hot)
 
     with tf.Session() as sess:
-        for i in range(100):
+        for i in range(50):
             img, l = sess.run([test_image_batch, test_label_batch])
             print(img.shape, l)

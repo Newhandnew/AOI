@@ -7,7 +7,7 @@ from read_tfrecord import get_data_batch, get_record_number
 slim = tf.contrib.slim
 
 flags = tf.app.flags
-flags.DEFINE_string('logs_dir', '',
+flags.DEFINE_string('logs_dir', 'test',
                     'Directory to save the checkpoints and training summaries.')
 FLAGS = flags.FLAGS
 
@@ -19,14 +19,14 @@ def main(_):
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
     data_dir = 'data'
-    tfrecord_train = 'AOI_train.tfrecords'
+    tfrecord_train = 'aoi_test.tfrecords'
     load_checkpoint = True
     train_tf_path = os.path.join(data_dir, tfrecord_train)
 
     crop_size = [224, 224]
     # Learning params
     learning_rate = 0.01
-    num_epochs = 500
+    num_epochs = 400
     batch_size = 256
     num_examples = get_record_number(train_tf_path)
     num_batches = math.ceil(num_examples / float(batch_size))
@@ -47,7 +47,7 @@ def main(_):
         # convert to float batch
         train_image_batch = tf.to_float(train_image_batch)
 
-        tf.summary.image('image', train_image_batch)
+        # tf.summary.image('image', train_image_batch)
 
         with slim.arg_scope(alexnet_my_arg_scope(is_training=True)):
             net, end_points = alexnet_v2(train_image_batch, num_classes=num_classes, is_training=True)
