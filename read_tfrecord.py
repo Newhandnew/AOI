@@ -49,7 +49,7 @@ def get_data_batch(tfrecord_path, image_size, batch_size, is_training=False, one
 if __name__ == "__main__":
 
     data_dir = 'data'
-    tfrecord_test = 'aoi_test.tfrecords'
+    tfrecord_test = 'aoi_train.tfrecords'
     test_tf_path = os.path.join(data_dir, tfrecord_test)
     logs_path = "logs"
     image_size = [224, 224]
@@ -69,3 +69,5 @@ if __name__ == "__main__":
         for i in range(50):
             img, l = sess.run([test_image_batch, test_label_batch])
             print(img.shape, l)
+            # cv2.imwrite('{}_side.png'.format(i), img[23][:, :, 0])
+            # cv2.imwrite('{}_pattern.png'.format(i), img[23][:, :, 1])

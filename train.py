@@ -19,7 +19,7 @@ def main(_):
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
     data_dir = 'data'
-    tfrecord_train = 'aoi_test.tfrecords'
+    tfrecord_train = 'aoi_train.tfrecords'
     load_checkpoint = True
     train_tf_path = os.path.join(data_dir, tfrecord_train)
 
@@ -30,7 +30,8 @@ def main(_):
     batch_size = 256
     num_examples = get_record_number(train_tf_path)
     num_batches = math.ceil(num_examples / float(batch_size))
-    print('batch number: {}'.format(num_batches))
+    total_steps = num_batches * num_epochs
+    print('batch number: {}, total steps: {}'.format(num_batches, total_steps))
 
     # Network params
     num_classes = 2

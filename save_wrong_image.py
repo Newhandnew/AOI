@@ -9,18 +9,17 @@ from read_tfrecord import get_data_batch, get_record_number
 slim = tf.contrib.slim
 
 data_dir = 'data'
-tfrecord_test = 'AOI_test.tfrecords'
+tfrecord_test = 'aoi_test.tfrecords'
 test_tf_path = os.path.join(data_dir, tfrecord_test)
-logs_path = 'logs/alex_batch_norm_refine_data_batch512' #"logs"
+logs_path = 'logs/alexnet_new_data' #"logs"
 crop_size = [224, 224]
 num_classes = 2
 output_image_dir = "wrong_images"
 
 test_list = os.path.join(data_dir, 'test_list')
-test_list_array = []
-with open(test_list, 'r') as f:
-    for line in f:
-        test_list_array.append(line)
+
+with open(test_list) as f:
+    test_list_array = [line.strip() for line in f]
 
 num_examples = get_record_number(test_tf_path)
 batch_size = 32
@@ -65,8 +64,12 @@ with tf.Session(config=session_config) as sess:
         for index in incorrect_index:
             # file_name = '{}/{}_{}_{}_{}.jpeg'.format(output_image_dir, i, index, pred[index], label[index])
             file_name = test_list_array[i * batch_size + index].rstrip()
-            output_path = os.path.join(output_image_dir, file_name[10:])
+            file_name = os.path.basename(file_name)
+            output_path = os.path.join(output_image_dir, file_name)
+            pattern_name = output_path + '_pattern.png'
+            side_light_name = output_path + '_side.png'
+            cv2.imwrite(pattern_name, images[index][:, :, 1])
+            cv2.imwrite(side_light_name, images[index][:, :, 0])
             print(file_name, end=' ')
-            cv2.imwrite(output_path, images[index])
 
 

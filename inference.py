@@ -19,14 +19,19 @@ def main(_):
     """
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
-    img_path = '/home/new/Downloads/dataset/Remark_OK/4A833K59QNZZ' #'/media/new/A43C2A8E3C2A5C14/Downloads/AOI_dataset/Remark_OK/4A833K76FTZZ'
+    img_path = '/media/new/A43C2A8E3C2A5C14/Downloads/AOI_dataset/Remark_OK/4A833K57KQZZ'
     pattern_name = img_path + "_01.bmp"
     side_light_name = img_path + "_sl.bmp"
     crop_size = [224, 224]
     num_classes = 2
     crop_image = CropImage('ng', num_classes)
-    pattern_images = crop_image.crop_ok_image(pattern_name, crop_size)
     side_light_images = crop_image.crop_ok_image(side_light_name, crop_size)
+    pattern_images = crop_image.crop_ok_image(pattern_name, crop_size)
+    # img_path = '../auto_labeling/picture/0/4A833K59QNZZ_127' #'/media/new/A43C2A8E3C2A5C14/Downloads/AOI_dataset/Remark_OK/4A833K76FTZZ'
+    # pattern_name = img_path + "_01.png"
+    # side_light_name = img_path + "_sl.png"
+    # pattern_images = [cv2.imread(pattern_name, 0)]
+    # side_light_images = [cv2.imread(side_light_name, 0)]
 
     pattern_placeholder = tf.placeholder(tf.uint8, [None, crop_size[0], crop_size[1]], name='pattern_input')
     side_light_placeholder = tf.placeholder(tf.uint8, [None, crop_size[0], crop_size[1]], name='side_light_input')
