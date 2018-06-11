@@ -9,14 +9,16 @@ from read_tfrecord import get_data_batch, get_record_number
 slim = tf.contrib.slim
 
 data_dir = 'data'
-tfrecord_test = 'aoi_test.tfrecords'
+tfrecord_test = 'aoi_7_pattern_test.tfrecords'
 test_tf_path = os.path.join(data_dir, tfrecord_test)
-logs_path = 'logs/alexnet_new_data' #"logs"
+logs_path = 'logs/alexnet_7_pattern' #"logs"
 crop_size = [224, 224]
 num_classes = 2
 output_image_dir = "wrong_images"
+pattern_extension = ['sl', '01', '02', '03', '04', '05', '06']
+image_extension = 'png'
 
-test_list = os.path.join(data_dir, 'test_list')
+test_list = os.path.join(data_dir, 'test_7_pattern_list')
 
 with open(test_list) as f:
     test_list_array = [line.strip() for line in f]
@@ -29,7 +31,7 @@ if not os.path.exists(output_image_dir):
     os.makedirs(output_image_dir)
 # Load the data
 test_image_batch, test_label_batch = get_data_batch(
-    test_tf_path, crop_size, batch_size, is_training=False, one_hot=False)
+    test_tf_path, pattern_extension, crop_size, batch_size, is_training=False, one_hot=False)
 # convert to float batch
 test_image_batch = tf.to_float(test_image_batch)
 # Define the network
@@ -66,10 +68,10 @@ with tf.Session(config=session_config) as sess:
             file_name = test_list_array[i * batch_size + index].rstrip()
             file_name = os.path.basename(file_name)
             output_path = os.path.join(output_image_dir, file_name)
-            pattern_name = output_path + '_pattern.png'
-            side_light_name = output_path + '_side.png'
-            cv2.imwrite(pattern_name, images[index][:, :, 1])
-            cv2.imwrite(side_light_name, images[index][:, :, 0])
+            for pattern_num, pattern in enumerate(pattern_extension):
+                image_path = output_path + '_' + pattern + '.' + image_extension
+                cv2.imwrite(image_path, images[index][:, :, pattern_num])
             print(file_name, end=' ')
+        print('incorrect number: {}'.format(len(incorrect_index)))
 
 

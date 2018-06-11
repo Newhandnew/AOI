@@ -19,7 +19,7 @@ def main(_):
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
     data_dir = 'data'
-    tfrecord_train = 'aoi_train.tfrecords'
+    tfrecord_train = 'aoi_7_pattern_train.tfrecords'
     load_checkpoint = True
     train_tf_path = os.path.join(data_dir, tfrecord_train)
 
@@ -33,7 +33,7 @@ def main(_):
     total_steps = num_batches * num_epochs
     print('batch number: {}, total steps: {}'.format(num_batches, total_steps))
 
-    # Network params
+    pattern_extension = ['sl', '01', '02', '03', '04', '05', '06']
     num_classes = 2
 
     # Launch the graph
@@ -44,7 +44,7 @@ def main(_):
 
         # Load the data
         train_image_batch, train_label_batch = get_data_batch(
-            train_tf_path, crop_size, batch_size, is_training=True, one_hot=False)
+            train_tf_path, pattern_extension, crop_size, batch_size, is_training=True, one_hot=False)
         # convert to float batch
         train_image_batch = tf.to_float(train_image_batch)
 

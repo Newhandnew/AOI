@@ -19,17 +19,18 @@ def main(_):
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
     data_dir = 'data'
-    tfrecord_test = 'aoi_test.tfrecords'
+    tfrecord_test = 'aoi_7_pattern_test.tfrecords'
     test_tf_path = os.path.join(data_dir, tfrecord_test)
     crop_size = [224, 224]
     num_classes = 2
+    pattern_extension = ['sl', '01', '02', '03', '04', '05', '06']
 
     num_examples = get_record_number(test_tf_path)
     batch_size = 64
     num_batches = math.ceil(num_examples / float(batch_size))
     # Load the data
     test_image_batch, test_label_batch = get_data_batch(
-        test_tf_path, crop_size, batch_size, is_training=False, one_hot=False)
+        test_tf_path, pattern_extension, crop_size, batch_size, is_training=False, one_hot=False)
     # convert to float batch
     test_image_batch = tf.to_float(test_image_batch)
     # Define the network
