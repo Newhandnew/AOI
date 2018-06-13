@@ -8,7 +8,7 @@ from multi_pattern_process import get_pattern_image_path
 slim = tf.contrib.slim
 
 flags = tf.app.flags
-flags.DEFINE_string('logs_dir', 'alexnet_7_pattern',
+flags.DEFINE_string('logs_dir', 'alexnet_7_pattern_20x20_new',
                     'Directory to save the checkpoints and training summaries.')
 FLAGS = flags.FLAGS
 
@@ -19,7 +19,7 @@ def main(_):
     """
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
-    img_path = '/media/new/A43C2A8E3C2A5C14/Downloads/AOI_dataset/Remark_OK/4A833K59DAZZ'
+    img_path = '/home/new/Downloads/dataset/Remark_NG/4A833K74PDZZ' #'/media/new/A43C2A8E3C2A5C14/Downloads/AOI_dataset/Remark_OK/4A833K59DAZZ'
     pattern_extension = ['sl', '01', '02', '03', '04', '05', '06']
     image_extension = 'bmp'
     pattern_path_list = get_pattern_image_path(img_path, pattern_extension, image_extension)

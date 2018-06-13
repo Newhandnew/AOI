@@ -11,7 +11,7 @@ slim = tf.contrib.slim
 data_dir = 'data'
 tfrecord_test = 'aoi_7_pattern_test.tfrecords'
 test_tf_path = os.path.join(data_dir, tfrecord_test)
-logs_path = 'logs/alexnet_7_pattern' #"logs"
+logs_path = 'logs/alexnet_7_pattern_22x22'
 crop_size = [224, 224]
 num_classes = 2
 output_image_dir = "wrong_images"
@@ -55,6 +55,7 @@ with tf.Session(config=session_config) as sess:
     else:
         print('No checkpoint found')
 
+    incorrect_number = 0
     for i in range(num_batches):
         start_time = time.time()
         pred, label, images, acc = sess.run([predict, test_label_batch, test_image_batch, accuracy])
@@ -63,6 +64,7 @@ with tf.Session(config=session_config) as sess:
 
         incorrect = (pred != label)
         incorrect_index = np.nonzero(incorrect)[0]
+        incorrect_number += len(incorrect_index)
         for index in incorrect_index:
             # file_name = '{}/{}_{}_{}_{}.jpeg'.format(output_image_dir, i, index, pred[index], label[index])
             file_name = test_list_array[i * batch_size + index].rstrip()
@@ -72,6 +74,7 @@ with tf.Session(config=session_config) as sess:
                 image_path = output_path + '_' + pattern + '.' + image_extension
                 cv2.imwrite(image_path, images[index][:, :, pattern_num])
             print(file_name, end=' ')
-        print('incorrect number: {}'.format(len(incorrect_index)))
+
+    print('incorrect number: {}'.format(incorrect_number))
 
 
