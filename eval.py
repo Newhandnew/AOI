@@ -46,6 +46,8 @@ def main(_):
     names_to_values, names_to_updates = slim.metrics.aggregate_metric_map({
         'test/Accuracy': slim.metrics.streaming_accuracy(predictions, test_label_batch),
         'test/mse': slim.metrics.streaming_mean_squared_error(predictions, test_label_batch),
+        'test/Recall': slim.metrics.streaming_recall(predictions, test_label_batch),
+        'test/Precision': slim.metrics.streaming_precision(predictions, test_label_batch)
         # 'test/Recall@5': slim.metrics.streaming_recall_at_k(logits, test_label, 5),
     })
     for name, tensor in names_to_updates.items():

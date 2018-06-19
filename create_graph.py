@@ -6,7 +6,7 @@ from alexnet import alexnet_v2, alexnet_my_arg_scope
 slim = tf.contrib.slim
 
 flags = tf.app.flags
-flags.DEFINE_string('logs_dir', 'alexnet_7_pattern_20x20',
+flags.DEFINE_string('logs_dir', 'alexnet_7_pattern_22x22_new',
                     'Directory to save the checkpoints and training summaries.')
 FLAGS = flags.FLAGS
 

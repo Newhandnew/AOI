@@ -4,7 +4,7 @@ from tensorflow.python.framework import graph_util
 
 flags = tf.app.flags
 flags.DEFINE_string("output_node_names", "output_argmax", "use comma to separate different nodes")
-flags.DEFINE_string("model_folder", "logs/alexnet_7_pattern_20x20", "model with parameters")
+flags.DEFINE_string("model_folder", "logs/alexnet_7_pattern_22x22_new", "model with parameters")
 flags.DEFINE_string("output_file", "frozen_model.pb", "output model name, place in --model_folder")
 
 FLAGS = flags.FLAGS
