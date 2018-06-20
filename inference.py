@@ -4,6 +4,8 @@ import time
 from alexnet import alexnet_v2, alexnet_my_arg_scope
 from crop_image import CropImage
 from multi_pattern_process import get_pattern_image_path
+# import mobilenet_v1
+import inception_v1
 
 slim = tf.contrib.slim
 
@@ -43,8 +45,10 @@ def main(_):
                              pattern4_placeholder, pattern5_placeholder, pattern6_placeholder), -1)
     float_input_tensor = tf.to_float(merged_image)
     # Define the network
-    with slim.arg_scope(alexnet_my_arg_scope(is_training=False)):
-        logits, _ = alexnet_v2(float_input_tensor, num_classes=num_classes, is_training=False)
+    # with slim.arg_scope(mobilenet_v2.training_scope(is_training=False)):
+    #     logits, _ = mobilenet_v2.mobilenet(tf.to_float(image_tensor), num_classes=num_classes)
+    with slim.arg_scope(inception_v1.inception_v1_arg_scope()):
+        logits, end_points = inception_v1.inception_v1(float_input_tensor, num_classes=num_classes, is_training=False)
 
     predictions = tf.argmax(logits, 1, name='output_argmax')
     # Setup the global step.

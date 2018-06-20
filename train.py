@@ -1,8 +1,10 @@
 import os
 import tensorflow as tf
 import math
-from alexnet import alexnet_v2, alexnet_v2_arg_scope, alexnet_my_arg_scope
+# from alexnet import alexnet_v2, alexnet_v2_arg_scope, alexnet_my_arg_scope
+import mobilenet_v2
 from read_tfrecord import get_data_batch, get_record_number
+import inception_v1
 
 slim = tf.contrib.slim
 
@@ -36,7 +38,7 @@ def main(_):
     pattern_extension = ['sl', '01', '02', '03', '04', '05', '06']
     num_classes = 2
     num_ng_sample = 4120
-    num_ok_sample = 11180
+    num_ok_sample = 15660
     class_ratio = num_ng_sample / (num_ng_sample + num_ok_sample)
 
 
@@ -50,12 +52,11 @@ def main(_):
         train_image_batch, train_label_batch = get_data_batch(
             train_tf_path, pattern_extension, crop_size, batch_size, is_training=True, one_hot=False)
         # convert to float batch
-        train_image_batch = tf.to_float(train_image_batch)
+        float_image_batch = tf.to_float(train_image_batch)
 
-        # tf.summary.image('image', train_image_batch)
+        with slim.arg_scope(inception_v1.inception_v1_arg_scope()):
+            logits, end_points = inception_v1.inception_v1(float_image_batch, num_classes=num_classes, is_training=True)
 
-        with slim.arg_scope(alexnet_my_arg_scope(is_training=True)):
-            logits, end_points = alexnet_v2(train_image_batch, num_classes=num_classes, is_training=True)
         # make summaries of every operation in the node
         for layer_name, layer_op in end_points.items():
             tf.summary.histogram(layer_name, layer_op)
