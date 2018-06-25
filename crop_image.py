@@ -114,6 +114,29 @@ class CropImage(object):
         image_path = os.path.join(self.save_image_dir, image_name)
         cv2.imwrite(image_path, self.image)
 
+    def save_image_array(self, pattern_array, image_basename, pattern_extension, label):
+        """save crop images as png
+
+            pattern_array: cropped images array, may be processed by crop_ok_image_array or crop_ng_image_array.
+            image_basename: only the series number of the cropped image. e.g. Core35397686
+            pattern_extension: save pattern name as extension. e.g. 01, 02, sl
+            label: separate different label in different directory. e.g. 0, 1, 2
+
+          Returns:
+            image_list: saved file list in {image_name}_{index} format. e.g. Core35397686_0
+          """
+        image_dir = os.path.join(self.save_image_dir, str(label))
+        image_list = []
+        for index in range(len(pattern_array)):
+            image_list_name = '{}_{}'.format(image_basename, index)
+            for pattern_index, extension in enumerate(pattern_extension):
+                pattern_file = '{}_{}.png'.format(image_list_name, extension)
+                image_path = os.path.join(image_dir, pattern_file)
+                cv2.imwrite(image_path, pattern_array[index][pattern_index])
+            image_list_name = os.path.join(image_dir, image_list_name)
+            image_list.append(image_list_name)
+        return image_list
+
 
 def main():
     img_path = '/home/new/Downloads/dataset/AOI/1.25/6P7BCY581TZZ/6P7BCY581TZZ1.tif'

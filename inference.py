@@ -10,7 +10,7 @@ import inception_v1
 slim = tf.contrib.slim
 
 flags = tf.app.flags
-flags.DEFINE_string('logs_dir', 'alexnet_7_pattern_22x22_weight',
+flags.DEFINE_string('logs_dir', 'inception_7_pattern',
                     'Directory to save the checkpoints and training summaries.')
 FLAGS = flags.FLAGS
 
@@ -21,7 +21,7 @@ def main(_):
     """
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
-    img_path = '/media/new/A43C2A8E3C2A5C14/Downloads/AOI_dataset/Remark_OK/4A833K59DAZZ'#'/home/new/Downloads/dataset/Remark_NG/4A833K74PDZZ' #
+    img_path = '/media/new/A43C2A8E3C2A5C14/Downloads/AOI_dataset/Remark_OK/4B834FD4TJZZ'#'/home/new/Downloads/dataset/Remark_NG/4A833K74PDZZ' #
     pattern_extension = ['sl', '01', '02', '03', '04', '05', '06']
     image_extension = 'bmp'
     pattern_path_list = get_pattern_image_path(img_path, pattern_extension, image_extension)

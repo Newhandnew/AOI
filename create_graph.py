@@ -3,13 +3,13 @@ import os
 import time
 # from alexnet import alexnet_v2, alexnet_my_arg_scope
 import mobilenet_v2
-import inception_v1
+import inception_v2
 
 slim = tf.contrib.slim
 
 flags = tf.app.flags
 
-flags.DEFINE_string('logs_dir', 'alexnet_7_pattern_22x22_new',
+flags.DEFINE_string('logs_dir', 'inception_7_pattern',
                     'Directory to save the checkpoints and training summaries.')
 FLAGS = flags.FLAGS
 
@@ -35,8 +35,10 @@ def main(_):
                              pattern4_placeholder, pattern5_placeholder, pattern6_placeholder), -1)
     float_input_tensor = tf.to_float(merged_image)
     # Define the network
-    with slim.arg_scope(inception_v1.inception_v1_arg_scope()):
-        logits, end_points = inception_v1.inception_v1(float_input_tensor, num_classes=num_classes, is_training=False)
+    # with slim.arg_scope(mobilenet_v2.training_scope(is_training=False)):
+    #     logits, _ = mobilenet_v2.mobilenet(float_input_tensor, num_classes=num_classes)
+    with slim.arg_scope(inception_v2.inception_v2_arg_scope()):
+        logits, end_points = inception_v2.inception_v2(float_input_tensor, num_classes=num_classes, is_training=False)
 
     predictions = tf.argmax(logits, 1, name='output_argmax')
     # Setup the global step.

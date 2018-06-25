@@ -4,7 +4,7 @@ import math
 # from alexnet import alexnet_v2, alexnet_v2_arg_scope, alexnet_my_arg_scope
 import mobilenet_v2
 from read_tfrecord import get_data_batch, get_record_number
-import inception_v1
+import inception_v2
 
 slim = tf.contrib.slim
 
@@ -28,7 +28,7 @@ def main(_):
     crop_size = [224, 224]
     # Learning params
     learning_rate = 0.01
-    num_epochs = 200
+    num_epochs = 500
     batch_size = 128
     num_examples = get_record_number(train_tf_path)
     num_batches = math.ceil(num_examples / float(batch_size))
@@ -54,8 +54,10 @@ def main(_):
         # convert to float batch
         float_image_batch = tf.to_float(train_image_batch)
 
-        with slim.arg_scope(inception_v1.inception_v1_arg_scope()):
-            logits, end_points = inception_v1.inception_v1(float_image_batch, num_classes=num_classes, is_training=True)
+        # with slim.arg_scope(mobilenet_v2.training_scope(is_training=True)):
+        #     logits, end_points = mobilenet_v2.mobilenet(float_image_batch, num_classes=num_classes)
+        with slim.arg_scope(inception_v2.inception_v2_arg_scope()):
+            logits, end_points = inception_v2.inception_v2(float_image_batch, num_classes=num_classes, is_training=True)
 
         # make summaries of every operation in the node
         for layer_name, layer_op in end_points.items():

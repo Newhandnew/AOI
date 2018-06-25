@@ -5,13 +5,14 @@ import numpy as np
 import cv2
 import time
 from alexnet import alexnet_v2, alexnet_my_arg_scope
+import inception_v1
 from read_tfrecord import get_data_batch, get_record_number
 slim = tf.contrib.slim
 
 data_dir = 'data'
 tfrecord_test = 'aoi_7_pattern_test.tfrecords'
 test_tf_path = os.path.join(data_dir, tfrecord_test)
-logs_path = 'logs/alexnet_7_pattern_22x22_new'
+logs_path = 'logs/inception_7_pattern'
 crop_size = [224, 224]
 num_classes = 2
 output_image_dir = "wrong_images"
@@ -33,10 +34,10 @@ if not os.path.exists(output_image_dir):
 test_image_batch, test_label_batch = get_data_batch(
     test_tf_path, pattern_extension, crop_size, batch_size, is_training=False, one_hot=False)
 # convert to float batch
-test_image_batch = tf.to_float(test_image_batch)
+float_image_batch = tf.to_float(test_image_batch)
 # Define the network
-with slim.arg_scope(alexnet_my_arg_scope(is_training=False)):
-    logits, _ = alexnet_v2(test_image_batch, num_classes=num_classes, is_training=False)
+with slim.arg_scope(inception_v1.inception_v1_arg_scope()):
+    logits, end_points = inception_v1.inception_v1(float_image_batch, num_classes=num_classes, is_training=False)
 
 predict = tf.argmax(logits, 1)
 correct_pred = tf.equal(predict, test_label_batch)
