@@ -3,7 +3,7 @@ import os
 import time
 # from alexnet import alexnet_v2, alexnet_my_arg_scope
 import mobilenet_v2
-import inception_v2
+import inception_v1
 
 slim = tf.contrib.slim
 
@@ -37,8 +37,8 @@ def main(_):
     # Define the network
     # with slim.arg_scope(mobilenet_v2.training_scope(is_training=False)):
     #     logits, _ = mobilenet_v2.mobilenet(float_input_tensor, num_classes=num_classes)
-    with slim.arg_scope(inception_v2.inception_v2_arg_scope()):
-        logits, end_points = inception_v2.inception_v2(float_input_tensor, num_classes=num_classes, is_training=False)
+    with slim.arg_scope(inception_v1.inception_v1_arg_scope()):
+        logits, end_points = inception_v1.inception_v1(float_input_tensor, num_classes=num_classes, is_training=False)
 
     predictions = tf.argmax(logits, 1, name='output_argmax')
     # Setup the global step.

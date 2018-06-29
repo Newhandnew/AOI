@@ -21,7 +21,7 @@ def main(_):
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
     data_dir = 'data'
-    tfrecord_test = 'aoi_7_pattern_test.tfrecords'
+    tfrecord_test = 'aoi_7_pattern_0625_test.tfrecords'
     test_tf_path = os.path.join(data_dir, tfrecord_test)
     crop_size = [224, 224]
     num_classes = 2

@@ -14,7 +14,11 @@ slim = tf.contrib.slim
 
 flags = tf.app.flags
 flags.DEFINE_string('logs_dir', 'inception_7_pattern',
-                    'Directory to save the checkpoints and training summaries.')
+                    'Directory to load checkpoint')
+flags.DEFINE_string('test_dir', '/media/new/A43C2A8E3C2A5C14/Downloads/AOI_dataset/new_folder',
+                    'Directory of test data')
+flags.DEFINE_string('save_image_dir', 'picture_7_pattern',
+                    'Directory of saved pictures')
 FLAGS = flags.FLAGS
 
 
@@ -23,9 +27,10 @@ def main(_):
     Configuration Part.
     """
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
+    assert FLAGS.test_dir, '`test_dir` is missing.'
+    assert FLAGS.save_image_dir, '`save_image_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
-    save_image_dir = "picture_7_pattern"
-    data_dir = '/media/new/A43C2A8E3C2A5C14/Downloads/AOI_dataset/Remark_OK/'
+    save_image_dir = FLAGS.save_image_dir
     label = 0
     num_class = 2
     batch_size = 100
@@ -37,7 +42,7 @@ def main(_):
     crop_size = [224, 224]
     series_list = []
     series_extension_name = 'xml'
-    target_names = os.path.join(data_dir, '*.' + series_extension_name)
+    target_names = os.path.join(FLAGS.test_dir, '*.' + series_extension_name)
     log_path = glob.glob(target_names)
     for file_path in log_path:
         series_number = os.path.splitext(file_path)[0]
@@ -107,16 +112,13 @@ def main(_):
                 incorrect = (predict_array != label)
                 wrong_index = np.nonzero(incorrect)[0]
                 incorrect_number += len(wrong_index)
-                wrong_image_list = []
                 for index in wrong_index:
-                    tmp_list = []
+                    wrong_image_list = []
                     for image in image_array:
-                        tmp_list.append(image[index])
-                    wrong_image_list.append(tmp_list)
+                        wrong_image_list.append(image[index])
 
-                image_list = crop_image.save_image_array(wrong_image_list, image_name, pattern_extension, label)
-                for image in image_list:
-                    image_list_file.write('{}\n'.format(image))
+                    image_list = crop_image.save_image_array(wrong_image_list, image_name, index, pattern_extension, label)
+                    image_list_file.write('{}\n'.format(image_list))
 
                 elapsed_time = time.time() - start_time
                 print('{} inference elapsed time: {}'.format(image_name, elapsed_time))

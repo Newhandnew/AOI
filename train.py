@@ -4,7 +4,7 @@ import math
 # from alexnet import alexnet_v2, alexnet_v2_arg_scope, alexnet_my_arg_scope
 import mobilenet_v2
 from read_tfrecord import get_data_batch, get_record_number
-import inception_v2
+import inception_v1
 
 slim = tf.contrib.slim
 
@@ -21,7 +21,7 @@ def main(_):
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
     data_dir = 'data'
-    tfrecord_train = 'aoi_7_pattern_train.tfrecords'
+    tfrecord_train = 'aoi_7_pattern_0625_train.tfrecords'
     load_checkpoint = True
     train_tf_path = os.path.join(data_dir, tfrecord_train)
 
@@ -37,8 +37,8 @@ def main(_):
 
     pattern_extension = ['sl', '01', '02', '03', '04', '05', '06']
     num_classes = 2
-    num_ng_sample = 4120
-    num_ok_sample = 15660
+    num_ng_sample = 3760
+    num_ok_sample = 4929
     class_ratio = num_ng_sample / (num_ng_sample + num_ok_sample)
 
 
@@ -56,8 +56,8 @@ def main(_):
 
         # with slim.arg_scope(mobilenet_v2.training_scope(is_training=True)):
         #     logits, end_points = mobilenet_v2.mobilenet(float_image_batch, num_classes=num_classes)
-        with slim.arg_scope(inception_v2.inception_v2_arg_scope()):
-            logits, end_points = inception_v2.inception_v2(float_image_batch, num_classes=num_classes, is_training=True)
+        with slim.arg_scope(inception_v1.inception_v1_arg_scope()):
+            logits, end_points = inception_v1.inception_v1(float_image_batch, num_classes=num_classes, is_training=True)
 
         # make summaries of every operation in the node
         for layer_name, layer_op in end_points.items():
