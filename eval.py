@@ -3,7 +3,7 @@ import os
 import math
 # from alexnet import alexnet_v2, alexnet_my_arg_scope
 import mobilenet_v2
-import inception_v2
+import inception_resnet_v2
 from read_tfrecord import get_data_batch, get_record_number
 
 slim = tf.contrib.slim
@@ -21,14 +21,14 @@ def main(_):
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
     data_dir = 'data'
-    tfrecord_test = 'aoi_7_pattern_0625_test.tfrecords'
+    tfrecord_test = 'aoi_7_pattern_299_0625_test.tfrecords'
     test_tf_path = os.path.join(data_dir, tfrecord_test)
-    crop_size = [224, 224]
+    crop_size = [299, 299]
     num_classes = 2
     pattern_extension = ['sl', '01', '02', '03', '04', '05', '06']
 
     num_examples = get_record_number(test_tf_path)
-    batch_size = 64
+    batch_size = 16
     num_batches = math.ceil(num_examples / float(batch_size))
     # Load the data
     test_image_batch, test_label_batch = get_data_batch(
@@ -38,8 +38,8 @@ def main(_):
     # Define the network
     # with slim.arg_scope(mobilenet_v2.training_scope(is_training=False)):
     #     logits, _ = mobilenet_v2.mobilenet(float_image_batch, num_classes=num_classes)
-    with slim.arg_scope(inception_v2.inception_v2_arg_scope()):
-        logits, end_points = inception_v2.inception_v2(float_image_batch, num_classes=num_classes, is_training=False)
+    with slim.arg_scope(inception_resnet_v2.inception_resnet_v2_arg_scope()):
+        logits, end_points = inception_resnet_v2.inception_resnet_v2(float_image_batch, num_classes=num_classes, is_training=False)
 
     predictions = tf.argmax(logits, 1)
 
