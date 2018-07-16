@@ -114,6 +114,15 @@ class CropImage(object):
         image_path = os.path.join(self.save_image_dir, image_name)
         cv2.imwrite(image_path, self.image)
 
+    def save_defect_for_whole_image(self, wrong_index, base_image_path, image_name, crop_size):
+        img_show = cv2.imread(base_image_path, 0)
+        for index in wrong_index:
+            defect = self.grid_array[index]
+            cv2.rectangle(img_show, defect, (defect[0] + crop_size[0], defect[1] + crop_size[1]), 255, 6)
+            cv2.putText(img_show, str(index), defect, cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
+        image_path = os.path.join(self.save_image_dir, image_name)
+        cv2.imwrite(image_path, img_show)
+
     def save_image_array(self, pattern_array, image_basename, index, pattern_extension, label):
         """save crop images as png
 

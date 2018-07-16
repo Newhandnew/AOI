@@ -17,7 +17,7 @@ flags.DEFINE_string('logs_dir', 'inception_7_pattern',
                     'Directory to load checkpoint')
 flags.DEFINE_string('test_dir', '/media/new/A43C2A8E3C2A5C14/Downloads/AOI_dataset/new_folder',
                     'Directory of test data')
-flags.DEFINE_string('save_image_dir', 'picture_7_pattern',
+flags.DEFINE_string('save_image_dir', 'picture_7_pattern_retrain',
                     'Directory of saved pictures')
 FLAGS = flags.FLAGS
 
@@ -41,7 +41,7 @@ def main(_):
     image_extension = 'bmp'
     crop_size = [224, 224]
     series_list = []
-    series_extension_name = 'xml'
+    series_extension_name = 'yml'
     target_names = os.path.join(FLAGS.test_dir, '*.' + series_extension_name)
     log_path = glob.glob(target_names)
     for file_path in log_path:
@@ -111,6 +111,7 @@ def main(_):
                 # print("Prediction: {}, shape: {}".format(predict_array, predict_array.shape))
                 incorrect = (predict_array != label)
                 wrong_index = np.nonzero(incorrect)[0]
+                crop_image.save_defect_for_whole_image(wrong_index, pattern_path_list[1], image_name + ".jpg", crop_size)
                 incorrect_number += len(wrong_index)
                 for index in wrong_index:
                     wrong_image_list = []
