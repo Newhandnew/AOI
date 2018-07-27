@@ -11,6 +11,7 @@ class CropImage(object):
         self.grid_array = []
         self.save_image_dir = ''
         self.image = 0
+        self.show_image_directory = ''
         if save_image_dir != '':
             self.set_save_dir(save_image_dir, num_class)
 
@@ -93,6 +94,10 @@ class CropImage(object):
             if not os.path.exists(path):
                 os.makedirs(path)
 
+        self.show_image_directory = os.path.join(self.save_image_dir, 'show')
+        if not os.path.exists(self.show_image_directory):
+            os.makedirs(self.show_image_directory)
+
     def save_image(self, image_array, image_name, label):
         image_dir = os.path.join(self.save_image_dir, str(label))
         for i, image in enumerate(image_array):
@@ -114,14 +119,52 @@ class CropImage(object):
         image_path = os.path.join(self.save_image_dir, image_name)
         cv2.imwrite(image_path, self.image)
 
-    def save_defect_for_whole_image(self, wrong_index, base_image_path, image_name, crop_size):
-        img_show = cv2.imread(base_image_path, 0)
-        for index in wrong_index:
-            defect = self.grid_array[index]
-            cv2.rectangle(img_show, defect, (defect[0] + crop_size[0], defect[1] + crop_size[1]), 255, 6)
-            cv2.putText(img_show, str(index), defect, cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 255, 255), 2)
-        image_path = os.path.join(self.save_image_dir, image_name)
-        cv2.imwrite(image_path, img_show)
+    def save_defect_for_ok_image(self, wrong_index, pattern_path_list, image_base_name, pattern_extension, crop_size):
+        for pattern_index, extension in enumerate(pattern_extension):
+            pattern_file = '{}_{}.png'.format(image_base_name, extension)
+            img_show = cv2.imread(pattern_path_list[pattern_index], 0)
+            for index in wrong_index:
+                defect = self.grid_array[index]
+                cv2.rectangle(img_show, defect, (defect[0] + crop_size[0], defect[1] + crop_size[1]), (255, 0, 0), 6)
+                cv2.putText(img_show, str(index), defect, cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 2)
+            image_path = os.path.join(self.show_image_directory, pattern_file)
+            cv2.imwrite(image_path, img_show)
+
+    def get_crop_index_from_defect(self, defect_point, crop_size):
+        for index, grid in enumerate(self.grid_array):
+            crop_x = grid[0]
+            crop_y = grid[1]
+            if crop_y < defect_point[1] < (crop_y + crop_size[1]):      # check y
+                if crop_x < defect_point[0] < (crop_x + crop_size[0]):      # check x
+                    return index
+        return 0
+
+    def get_index_list_from_defect_list(self, defect_list, crop_size):
+        index_list = []
+        for defect in defect_list:
+            index = self.get_crop_index_from_defect(defect, crop_size)
+            index_list.append(index)
+        return index_list
+
+    def save_defect_for_ng_image(self, defect_list, wrong_index, pattern_path_list, image_base_name,
+                                 pattern_extension, crop_size):
+        defect_index_list = self.get_index_list_from_defect_list(defect_list, crop_size)
+        ok_list = list(set(wrong_index) - set(defect_index_list))
+        ng_list = list(set(defect_index_list) - set(wrong_index))
+        for pattern_index, extension in enumerate(pattern_extension):
+            pattern_file = '{}_{}.png'.format(image_base_name, extension)
+            img_show = cv2.imread(pattern_path_list[pattern_index], 0)
+            for index in wrong_index:
+                defect = self.grid_array[index]
+                cv2.rectangle(img_show, defect, (defect[0] + crop_size[0], defect[1] + crop_size[1]), (255, 0, 0), 5)
+                cv2.putText(img_show, str(index), defect, cv2.FONT_HERSHEY_SIMPLEX, 3, (255, 0, 0), 2)
+            for index in defect_index_list:
+                defect = self.grid_array[index]
+                cv2.rectangle(img_show, defect, (defect[0] + crop_size[0], defect[1] + crop_size[1]), (0, 0, 255), 2)
+                cv2.putText(img_show, str(index), defect, cv2.FONT_HERSHEY_SIMPLEX, 3, (0, 0, 255), 2)
+            image_path = os.path.join(self.show_image_directory, pattern_file)
+            cv2.imwrite(image_path, img_show)
+        return ok_list, ng_list
 
     def save_image_array(self, pattern_array, image_basename, index, pattern_extension, label):
         """save crop images as png
@@ -145,7 +188,7 @@ class CropImage(object):
 
 
 def main():
-    img_path = '/home/new/Downloads/dataset/AOI/1.25/6P7BCY581TZZ/6P7BCY581TZZ1.tif'
+    img_path = '/home/new/Downloads/dataset/AOI_test/Core35397686_01.bmp'
     crop_size = [224, 224]
 
     # test ok crop
@@ -157,12 +200,14 @@ def main():
     # cv2.waitKey()
     # cv2.destroyAllWindows()
     # test ng crop
-    defect_point = (6486,3970)
+    defect_point = (6486, 3970)
     crop_number = 5
     save_image_dir = 'picture'
     num_class = 2
 
     crop_image = CropImage(save_image_dir, num_class)
+    ok_images = crop_image.crop_ok_image(img_path, crop_size)
+    print(crop_image.get_crop_image_from_defect(defect_point, crop_size))
     ng_images = crop_image.crop_ng_image(img_path, defect_point, crop_size, crop_number)
     crop_image.save_image(ng_images, 'test', '1')
     for index, image in enumerate(ng_images):
