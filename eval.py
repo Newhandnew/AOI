@@ -21,8 +21,10 @@ def main(_):
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
     data_dir = 'data'
-    tfrecord_test = 'aoi_7_pattern_0625_test.tfrecords'
-    test_tf_path = os.path.join(data_dir, tfrecord_test)
+    tfrecord_test = ['aoi_7_pattern_0703_test.tfrecords']
+    test_tf_path = []
+    for record in tfrecord_test:
+        test_tf_path.append(os.path.join(data_dir, record))
     crop_size = [224, 224]
     num_classes = 2
     pattern_extension = ['sl', '01', '02', '03', '04', '05', '06']
@@ -36,10 +38,10 @@ def main(_):
     # convert to float batch
     float_image_batch = tf.to_float(test_image_batch)
     # Define the network
-    # with slim.arg_scope(mobilenet_v2.training_scope(is_training=False)):
-    #     logits, _ = mobilenet_v2.mobilenet(float_image_batch, num_classes=num_classes)
-    with slim.arg_scope(inception_v2.inception_v2_arg_scope()):
-        logits, end_points = inception_v2.inception_v2(float_image_batch, num_classes=num_classes, is_training=False)
+    with slim.arg_scope(mobilenet_v2.training_scope(is_training=False)):
+        logits, _ = mobilenet_v2.mobilenet(float_image_batch, num_classes=num_classes)
+    # with slim.arg_scope(inception_v2.inception_v2_arg_scope()):
+    #     logits, end_points = inception_v2.inception_v2(float_image_batch, num_classes=num_classes, is_training=False)
 
     predictions = tf.argmax(logits, 1)
 

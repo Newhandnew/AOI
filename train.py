@@ -21,9 +21,11 @@ def main(_):
     assert FLAGS.logs_dir, '`logs_dir` is missing.'
     logs_path = os.path.join('logs', FLAGS.logs_dir)
     data_dir = 'data'
-    tfrecord_train = 'aoi_7_pattern_0625_train.tfrecords'
+    tfrecord_train = ['aoi_7_pattern_0703_train.tfrecords']
     load_checkpoint = True
-    train_tf_path = os.path.join(data_dir, tfrecord_train)
+    train_tf_path = []
+    for record in tfrecord_train:
+        train_tf_path.append(os.path.join(data_dir, record))
 
     crop_size = [224, 224]
     # Learning params
@@ -54,10 +56,10 @@ def main(_):
         # convert to float batch
         float_image_batch = tf.to_float(train_image_batch)
 
-        # with slim.arg_scope(mobilenet_v2.training_scope(is_training=True)):
-        #     logits, end_points = mobilenet_v2.mobilenet(float_image_batch, num_classes=num_classes)
-        with slim.arg_scope(inception_v1.inception_v1_arg_scope()):
-            logits, end_points = inception_v1.inception_v1(float_image_batch, num_classes=num_classes, is_training=True)
+        with slim.arg_scope(mobilenet_v2.training_scope(is_training=True)):
+            logits, end_points = mobilenet_v2.mobilenet(float_image_batch, num_classes=num_classes)
+        # with slim.arg_scope(inception_v1.inception_v1_arg_scope()):
+        #     logits, end_points = inception_v1.inception_v1(float_image_batch, num_classes=num_classes, is_training=True)
 
         # make summaries of every operation in the node
         for layer_name, layer_op in end_points.items():

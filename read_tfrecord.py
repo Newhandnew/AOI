@@ -22,7 +22,13 @@ def _parse_function(serialized_example, pattern_extension, image_size, one_hot=T
 
 
 def get_record_number(tfrecord_path):
-    return sum(1 for _ in tf.python_io.tf_record_iterator(tfrecord_path))
+    if type(tfrecord_path) == list:
+        record_size = 0
+        for tfrecord in tfrecord_path:
+            record_size += sum(1 for _ in tf.python_io.tf_record_iterator(tfrecord))
+    else:
+        record_size = sum(1 for _ in tf.python_io.tf_record_iterator(tfrecord_path))
+    return record_size
 
 
 def get_data_batch(tfrecord_path, pattern_extension, image_size, batch_size, is_training=False, one_hot=True, num_classes=2):
